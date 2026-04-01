@@ -423,7 +423,6 @@
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // ── MACHINES ─────────────────────────────────────────
-  // To find lat/lng: maps.google.com → right-click a spot → copy coords
   const MACHINES = [
     { id: 1, name: "Albertsons", address: "6755 Westminster Blvd., Westminster",  lat: 33.75918197631836, lng: -118.00305938720703 },
     { id: 2, name: "Vons",       address: "11861 Valley View St, Garden Grove",      lat: 33.7901681, lng: -118.0290381 },
@@ -431,6 +430,9 @@
     { id: 4, name: "Vons",       address: "5922 Edinger Ave, Huntington Beach",     lat: 33.7285737, lng: -118.0249531 },
     { id: 5, name: "Albertsons", address: "16061 Brookhurst St, Fountain Valley",      lat: 33.7294124, lng: -117.9544625 },
     { id: 6, name: "Ralphs",       address: "18405 Brookhurst St, Fountain Valley",      lat: 33.695939, lng: -117.9557873 },
+    { id: 6, name: "Albertsons",       address: "19640 Beach Blvd, Huntington Beach",      lat: 33.6771299, lng: -117.986945 },
+    { id: 6, name: "Ralphs",       address: "7201 Yorktown Ave, Huntington Beach",      lat: 33.6810114, lng: -118.0026956 }
+    
   ];
 
   let visits = [];          // local cache — loaded from Supabase on init
