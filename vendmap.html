@@ -388,10 +388,9 @@
           </select>
         </label>
 
-        <label>
-          Product You Got
-          <input type="text" id="form-product" placeholder="e.g. ETB, Booster Bundle, Single pack"/>
-        </label>
+        <div class="form-title" style="margin-top:4px">// Products</div>
+        <div id="product-rows" style="display:flex;flex-direction:column;gap:10px"></div>
+        <button type="button" class="btn" style="border:1px dashed var(--border);color:var(--muted);background:none;font-size:0.72rem;" onclick="addProductRow()">+ Add product</button>
 
         <label>
           Date & Time of Visit
@@ -550,55 +549,95 @@
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     document.getElementById('form-time').value = now.toISOString().slice(0, 16);
   }
+function addProductRow() {
+  const container = document.getElementById('product-rows');
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:8px;align-items:center';
+  row.innerHTML = `
+    <select style="flex:2">
+      <option value="">— Product —</option>
+      <option value="ETB">ETB</option>
+      <option value="Booster Bundle">Booster Bundle</option>
+      <option value="Booster Pack">Booster Pack</option>
+    </select>
+    <select style="flex:1">
+      <option value="1">x1</option>
+      <option value="2">x2</option>
+      <option value="3">x3</option>
+      <option value="4">x4</option>
+      <option value="5">x5</option>
+    </select>
+    <button type="button" onclick="this.parentElement.remove()"
+      style="background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:4px 6px;line-height:1">✕</button>
+  `;
+  container.appendChild(row);
+}
+
+function getProductRows() {
+  const rows = document.querySelectorAll('#product-rows > div');
+  const items = [];
+  rows.forEach(row => {
+    const selects = row.querySelectorAll('select');
+    const name    = selects[0].value;
+    const qty     = selects[1].value;
+    if (name) items.push({ name, qty: parseInt(qty) });
+  });
+  return items;
+}
 
   // ── LOG VISIT → SUPABASE INSERT ───────────────────────
   async function logVisit() {
-    const machineId = parseInt(document.getElementById('form-machine').value);
-    const product   = document.getElementById('form-product').value.trim();
-    const time      = document.getElementById('form-time').value;
-    const notes     = document.getElementById('form-notes').value.trim();
+  const machineId = parseInt(document.getElementById('form-machine').value);
+  const time      = document.getElementById('form-time').value;
+  const notes     = document.getElementById('form-notes').value.trim();
+  const items     = getProductRows();
 
-    if (!machineId || !product || !time) {
-      alert('Please fill in the machine, product, and time.');
-      return;
-    }
-
-    const btn = document.getElementById('submit-btn');
-    btn.disabled = true;
-    btn.textContent = 'Saving…';
-
-    // Insert into Supabase
-    const { data, error } = await sb
-      .from('visits')
-      .insert([{
-        machine_id:  machineId,
-        product:     product,
-        visited_at:  new Date(time).toISOString(),
-        notes:       notes || null,
-      }])
-      .select();   // returns the inserted row so we can add it to local cache
-
-    btn.disabled = false;
-    btn.textContent = 'Log Visit →';
-
-    if (error) {
-      console.error('Supabase insert error:', error);
-      showMsg('error-msg');
-      return;
-    }
-
-    // Add new row to local cache so UI updates instantly
-    visits.push(data[0]);
-
-    showMsg('success-msg');
-
-    // Clear form fields (keep machine + time selections)
-    document.getElementById('form-product').value = '';
-    document.getElementById('form-notes').value   = '';
-
-    buildMachineList();
-    buildHistory();
+  if (!machineId || !time) {
+    alert('Please select a machine and time.');
+    return;
   }
+  if (items.length === 0) {
+    alert('Please add at least one product.');
+    return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  // Insert one row per product into Supabase
+  const inserts = items.map(item => ({
+    machine_id: machineId,
+    product:    `${item.name} x${item.qty}`,
+    visited_at: new Date(time).toISOString(),
+    notes:      notes || null,
+  }));
+
+  const { data, error } = await sb
+    .from('visits')
+    .insert(inserts)
+    .select();
+
+  btn.disabled = false;
+  btn.textContent = 'Log Visit →';
+
+  if (error) {
+    console.error('Supabase insert error:', error);
+    showMsg('error-msg');
+    return;
+  }
+
+  data.forEach(row => visits.push(row));
+  showMsg('success-msg');
+
+  // Clear products and notes, keep machine + time
+  document.getElementById('product-rows').innerHTML = '';
+  document.getElementById('form-notes').value = '';
+  addProductRow(); // reset to one empty row
+
+  buildMachineList();
+  buildHistory();
+}
 
   function showMsg(id) {
     const el = document.getElementById(id);
@@ -680,6 +719,7 @@
     }
 
     buildMachineList();
+    addProductRow();
   }
 
   init();
