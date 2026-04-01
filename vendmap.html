@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title> Pokemon – Vending Machine Tracker</title>
+  <title>Pokemon – Vending Machine Tracker</title>
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -34,7 +34,6 @@
       overflow: hidden;
     }
 
-    /* ── Header ── */
     header {
       display: flex;
       align-items: center;
@@ -60,14 +59,31 @@
       font-family: 'Space Mono', monospace;
     }
 
-    /* ── Layout ── */
+    /* db status dot */
+    .db-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+    .db-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: background 0.4s;
+    }
+    .db-dot.connected   { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    .db-dot.error       { background: #ff4d4d; box-shadow: 0 0 6px #ff4d4d; }
+
     .layout {
       display: flex;
       flex: 1;
       overflow: hidden;
     }
 
-    /* ── Sidebar ── */
     .sidebar {
       width: 340px;
       flex-shrink: 0;
@@ -104,7 +120,6 @@
     .panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
     .panel.active { display: flex; }
 
-    /* Machine list */
     .machine-list {
       flex: 1;
       overflow-y: auto;
@@ -127,16 +142,8 @@
     .machine-card:hover { border-color: var(--accent); transform: translateX(2px); }
     .machine-card.selected { border-color: var(--accent); background: rgba(200,241,53,0.06); }
 
-    .machine-name {
-      font-weight: 600;
-      font-size: 0.9rem;
-      margin-bottom: 4px;
-    }
-    .machine-address {
-      font-size: 0.76rem;
-      color: var(--muted);
-      font-family: 'Space Mono', monospace;
-    }
+    .machine-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
+    .machine-address { font-size: 0.76rem; color: var(--muted); font-family: 'Space Mono', monospace; }
     .machine-meta {
       display: flex;
       justify-content: space-between;
@@ -153,7 +160,6 @@
       font-size: 0.68rem;
     }
 
-    /* Visit log form */
     .form-panel {
       padding: 16px;
       flex: 1;
@@ -207,11 +213,9 @@
       text-transform: uppercase;
       letter-spacing: 1px;
     }
-    .btn-primary {
-      background: var(--accent);
-      color: #0e0e0e;
-    }
+    .btn-primary { background: var(--accent); color: #0e0e0e; }
     .btn-primary:hover { background: #d8ff3a; transform: translateY(-1px); }
+    .btn-primary:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; transform: none; }
 
     .success-msg {
       background: rgba(200,241,53,0.1);
@@ -222,8 +226,16 @@
       color: var(--accent);
       display: none;
     }
+    .error-msg {
+      background: rgba(255,77,77,0.1);
+      border: 1px solid #ff4d4d;
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      color: #ff4d4d;
+      display: none;
+    }
 
-    /* Visit history */
     .visit-history {
       padding: 12px;
       flex: 1;
@@ -246,21 +258,9 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .visit-product {
-      font-weight: 600;
-      font-size: 0.88rem;
-      margin-bottom: 4px;
-    }
-    .visit-machine {
-      font-size: 0.75rem;
-      color: var(--accent2);
-      font-family: 'Space Mono', monospace;
-    }
-    .visit-time {
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-top: 4px;
-    }
+    .visit-product { font-weight: 600; font-size: 0.88rem; margin-bottom: 4px; }
+    .visit-machine { font-size: 0.75rem; color: var(--accent2); font-family: 'Space Mono', monospace; }
+    .visit-time    { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
 
     .empty-state {
       text-align: center;
@@ -271,13 +271,21 @@
     }
     .empty-state .icon { font-size: 2rem; margin-bottom: 10px; }
 
-    /* ── Map ── */
-    #map {
-      flex: 1;
-      background: #111;
+    /* Loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface) 25%, #222 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+      border-radius: var(--radius);
+      height: 72px;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
     }
 
-    /* Leaflet custom pin */
+    #map { flex: 1; background: #111; }
+
     .custom-pin {
       width: 34px;
       height: 34px;
@@ -289,17 +297,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.2s;
     }
-    .custom-pin.selected-pin {
-      background: var(--accent2);
-    }
-    .custom-pin-inner {
-      transform: rotate(45deg);
-      font-size: 14px;
-    }
+    .custom-pin.selected-pin { background: var(--accent2); }
+    .custom-pin-inner { transform: rotate(45deg); font-size: 14px; }
 
-    /* Leaflet popup overrides */
     .leaflet-popup-content-wrapper {
       background: var(--surface) !important;
       border: 1px solid var(--border) !important;
@@ -310,17 +311,8 @@
     .leaflet-popup-tip { background: var(--surface) !important; }
     .leaflet-popup-content { margin: 14px 16px !important; }
 
-    .popup-name {
-      font-weight: 700;
-      font-size: 0.95rem;
-      margin-bottom: 4px;
-    }
-    .popup-address {
-      font-size: 0.76rem;
-      color: var(--muted);
-      font-family: 'Space Mono', monospace;
-      margin-bottom: 10px;
-    }
+    .popup-name    { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+    .popup-address { font-size: 0.76rem; color: var(--muted); font-family: 'Space Mono', monospace; margin-bottom: 10px; }
     .popup-btn {
       background: var(--accent);
       color: #0e0e0e;
@@ -337,7 +329,6 @@
     }
     .popup-btn:hover { background: #d8ff3a; }
 
-    /* Scrollbar */
     .form-panel::-webkit-scrollbar,
     .visit-history::-webkit-scrollbar { width: 4px; }
     .form-panel::-webkit-scrollbar-thumb,
@@ -348,12 +339,15 @@
 
 <header>
   <div class="logo">Poke<span>Map</span></div>
+  <div class="db-status">
+    <div class="db-dot" id="db-dot"></div>
+    <span id="db-label">connecting…</span>
+  </div>
   <div class="header-sub">// Poke vending tracker</div>
 </header>
 
 <div class="layout">
 
-  <!-- ── Sidebar ── -->
   <div class="sidebar">
     <div class="sidebar-tabs">
       <button class="tab active" onclick="switchTab('machines')">Machines</button>
@@ -363,7 +357,11 @@
 
     <!-- Tab: Machines -->
     <div class="panel active" id="panel-machines">
-      <div class="machine-list" id="machine-list"></div>
+      <div class="machine-list" id="machine-list">
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+      </div>
     </div>
 
     <!-- Tab: Log Visit -->
@@ -380,7 +378,7 @@
 
         <label>
           Product You Got
-          <input type="text" id="form-product" placeholder="e.g. Doritos, Coke Zero, Kind Bar…"/>
+          <input type="text" id="form-product" placeholder="e.g. Charizard ex, Booster Bundle…"/>
         </label>
 
         <label>
@@ -390,11 +388,12 @@
 
         <label>
           Notes (optional)
-          <textarea id="form-notes" placeholder="Was it stocked? Any broken slots?"></textarea>
+          <textarea id="form-notes" placeholder="Was it stocked? Price? Anything else?"></textarea>
         </label>
 
-        <button class="btn btn-primary" onclick="logVisit()">Log Visit →</button>
-        <div class="success-msg" id="success-msg">✓ Visit logged successfully!</div>
+        <button class="btn btn-primary" id="submit-btn" onclick="logVisit()">Log Visit →</button>
+        <div class="success-msg" id="success-msg">✓ Visit saved to database!</div>
+        <div class="error-msg"  id="error-msg">✗ Save failed. Check console.</div>
       </div>
     </div>
 
@@ -409,57 +408,50 @@
     </div>
   </div>
 
-  <!-- ── Map ── -->
   <div id="map"></div>
 </div>
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Supabase JS SDK (v2) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-  // ── DATA ──────────────────────────────────────────────
-  // Add vending locations here
-  // To find lat/lng: go to maps.google.com, right-click a spot, click the coordinates
+  // ── SUPABASE CONFIG ───────────────────────────────────
+  const SUPABASE_URL = 'https://qrljgfqdsvvsgymigxpp.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_90ny3kRZmxCI26XHQrrQ-w_ccXRvHIa';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ── MACHINES ─────────────────────────────────────────
+  // To find lat/lng: maps.google.com → right-click a spot → copy coords
   const MACHINES = [
-    {
-      id: 1,
-      name: "Albertsons",
-      address: "wtv addy",
-      lat: 33.8170,
-      lng: -118.0375,
-    },
-    {
-      id: 2,
-      name: "Vons",
-      address: "addy",
-      lat: 33.8210,
-      lng: -118.0340,
-    },
-    {
-      id: 3,
-      name: "Vons",
-      address: "addy",
-      lat: 33.8145,
-      lng: -118.0410,
-    },
+    { id: 1, name: "Albertsons", address: "wtv addy",  lat: 33.8170, lng: -118.0375 },
+    { id: 2, name: "Vons",       address: "addy",      lat: 33.8210, lng: -118.0340 },
+    { id: 3, name: "Vons",       address: "addy",      lat: 33.8145, lng: -118.0410 },
   ];
 
-  // Visits are stored in memory for now
-  // Later: swap this array for a Supabase database call
-  let visits = [];
+  let visits = [];          // local cache — loaded from Supabase on init
   let selectedMachineId = null;
   let markers = {};
 
+  // ── DB STATUS DOT ─────────────────────────────────────
+  function setDbStatus(state) {
+    const dot   = document.getElementById('db-dot');
+    const label = document.getElementById('db-label');
+    dot.className = 'db-dot ' + state;
+    label.textContent = state === 'connected' ? 'db connected'
+                      : state === 'error'     ? 'db error'
+                      :                         'connecting…';
+  }
+
   // ── MAP SETUP ─────────────────────────────────────────
   const map = L.map('map', { zoomControl: true }).setView([33.8170, -118.0375], 15);
-
-  // Dark tile layer (CartoDB Dark Matter — free, no API key needed)
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap contributors © CARTO',
     maxZoom: 19,
   }).addTo(map);
 
-  // ── RENDER MACHINES ───────────────────────────────────
+  // ── PIN ICONS ─────────────────────────────────────────
   function createPinIcon(selected = false) {
     return L.divIcon({
       className: '',
@@ -474,32 +466,23 @@
 
   function selectMachine(id) {
     selectedMachineId = id;
-
-    // Update marker icons
-    MACHINES.forEach(m => {
-      markers[m.id].setIcon(createPinIcon(m.id === id));
-    });
-
-    // Highlight sidebar card
+    MACHINES.forEach(m => markers[m.id].setIcon(createPinIcon(m.id === id)));
     document.querySelectorAll('.machine-card').forEach(c => {
       c.classList.toggle('selected', parseInt(c.dataset.id) === id);
     });
-
-    // Pre-fill log form
     document.getElementById('form-machine').value = id;
   }
 
+  // ── MACHINE LIST ──────────────────────────────────────
   function buildMachineList() {
-    const list = document.getElementById('machine-list');
+    const list   = document.getElementById('machine-list');
     const select = document.getElementById('form-machine');
-
     list.innerHTML = '';
     select.innerHTML = '<option value="">— Select a machine —</option>';
 
     MACHINES.forEach(m => {
-      const visitCount = visits.filter(v => v.machineId === m.id).length;
+      const visitCount = visits.filter(v => v.machine_id === m.id).length;
 
-      // Sidebar card
       const card = document.createElement('div');
       card.className = 'machine-card';
       card.dataset.id = m.id;
@@ -518,7 +501,6 @@
       };
       list.appendChild(card);
 
-      // Dropdown option
       const opt = document.createElement('option');
       opt.value = m.id;
       opt.textContent = `${m.name} — ${m.address}`;
@@ -526,16 +508,15 @@
     });
   }
 
+  // ── MAP MARKERS ───────────────────────────────────────
   function buildMarkers() {
     MACHINES.forEach(m => {
       const marker = L.marker([m.lat, m.lng], { icon: createPinIcon(false) }).addTo(map);
-
       marker.bindPopup(`
         <div class="popup-name">${m.name}</div>
         <div class="popup-address">${m.address}</div>
         <button class="popup-btn" onclick="openLogFor(${m.id})">Log a visit →</button>
       `);
-
       marker.on('click', () => selectMachine(m.id));
       markers[m.id] = marker;
     });
@@ -545,15 +526,13 @@
     selectMachine(machineId);
     switchTab('log');
     document.getElementById('form-machine').value = machineId;
-
-    // Set current time as default
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     document.getElementById('form-time').value = now.toISOString().slice(0, 16);
   }
 
-  // ── LOG VISIT ─────────────────────────────────────────
-  function logVisit() {
+  // ── LOG VISIT → SUPABASE INSERT ───────────────────────
+  async function logVisit() {
     const machineId = parseInt(document.getElementById('form-machine').value);
     const product   = document.getElementById('form-product').value.trim();
     const time      = document.getElementById('form-time').value;
@@ -564,21 +543,47 @@
       return;
     }
 
-    const visit = { machineId, product, time, notes, id: Date.now() };
-    visits.push(visit);
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
 
-    // Show success
-    const msg = document.getElementById('success-msg');
-    msg.style.display = 'block';
-    setTimeout(() => msg.style.display = 'none', 2500);
+    // Insert into Supabase
+    const { data, error } = await sb
+      .from('visits')
+      .insert([{
+        machine_id:  machineId,
+        product:     product,
+        visited_at:  new Date(time).toISOString(),
+        notes:       notes || null,
+      }])
+      .select();   // returns the inserted row so we can add it to local cache
 
-    // Clear form
+    btn.disabled = false;
+    btn.textContent = 'Log Visit →';
+
+    if (error) {
+      console.error('Supabase insert error:', error);
+      showMsg('error-msg');
+      return;
+    }
+
+    // Add new row to local cache so UI updates instantly
+    visits.push(data[0]);
+
+    showMsg('success-msg');
+
+    // Clear form fields (keep machine + time selections)
     document.getElementById('form-product').value = '';
-    document.getElementById('form-notes').value = '';
+    document.getElementById('form-notes').value   = '';
 
-    // Refresh UI
     buildMachineList();
     buildHistory();
+  }
+
+  function showMsg(id) {
+    const el = document.getElementById(id);
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 2500);
   }
 
   // ── HISTORY ───────────────────────────────────────────
@@ -594,12 +599,15 @@
       return;
     }
 
-    const sorted = [...visits].sort((a, b) => new Date(b.time) - new Date(a.time));
+    // Sort newest first
+    const sorted = [...visits].sort((a, b) =>
+      new Date(b.visited_at) - new Date(a.visited_at)
+    );
     container.innerHTML = '';
 
     sorted.forEach(v => {
-      const machine = MACHINES.find(m => m.id === v.machineId);
-      const dt = new Date(v.time);
+      const machine   = MACHINES.find(m => m.id === v.machine_id);
+      const dt        = new Date(v.visited_at);
       const formatted = dt.toLocaleString('en-US', {
         month: 'short', day: 'numeric', year: 'numeric',
         hour: 'numeric', minute: '2-digit'
@@ -628,11 +636,36 @@
     if (name === 'history') buildHistory();
   }
 
-  // ── INIT ──────────────────────────────────────────────
-  // Set default datetime for log form
-  const now = new Date();
-  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-  document.getElementById('form-time').value = now.toISOString().slice(0, 16);
+  // ── INIT: LOAD ALL VISITS FROM SUPABASE ───────────────
+  async function init() {
+    // Set default datetime
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('form-time').value = now.toISOString().slice(0, 16);
+
+    buildMarkers();
+
+    // Fetch all visits from Supabase
+    const { data, error } = await sb
+      .from('visits')
+      .select('*')
+      .order('visited_at', { ascending: false });
+
+    if (error) {
+      console.error('Supabase fetch error:', error);
+      setDbStatus('error');
+    } else {
+      visits = data;
+      setDbStatus('connected');
+    }
+
+    buildMachineList();
+  }
+
+  init();
+</script>
+</body>
+</html>
 
   buildMarkers();
   buildMachineList();
