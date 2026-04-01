@@ -378,7 +378,7 @@
 
         <label>
           Product You Got
-          <input type="text" id="form-product" placeholder="e.g. Charizard ex, Booster Bundle…"/>
+          <input type="text" id="form-product" placeholder="e.g. ETB, Booster Bundle, Single pack"/>
         </label>
 
         <label>
@@ -388,7 +388,7 @@
 
         <label>
           Notes (optional)
-          <textarea id="form-notes" placeholder="Was it stocked? Price? Anything else?"></textarea>
+          <textarea id="form-notes" placeholder="Campers? "></textarea>
         </label>
 
         <button class="btn btn-primary" id="submit-btn" onclick="logVisit()">Log Visit →</button>
@@ -428,6 +428,9 @@
     { id: 1, name: "Albertsons", address: "6755 Westminster Blvd., Westminster",  lat: 33.75918197631836, lng: -118.00305938720703 },
     { id: 2, name: "Vons",       address: "11861 Valley View St, Garden Grove",      lat: 33.7901681, lng: -118.0290381 },
     { id: 3, name: "Vons",       address: "1800-2000 Ximeno Ave, Long Beach",      lat: 33.763408, lng: -118.1415743 },
+    { id: 4, name: "Vons",       address: "5922 Edinger Ave, Huntington Beach",     lat: 33.7285737, lng: -118.0249531 },
+    { id: 5, name: "Albertsons", address: "16061 Brookhurst St, Fountain Valley",      lat: 33.7294124, lng: -117.9544625 },
+    { id: 6, name: "Ralphs",       address: "18405 Brookhurst St, Fountain Valley",      lat: 33.695939, lng: -117.9557873 },
   ];
 
   let visits = [];          // local cache — loaded from Supabase on init
