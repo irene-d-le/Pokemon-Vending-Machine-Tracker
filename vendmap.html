@@ -505,7 +505,7 @@
 
   // ── MAP SETUP ─────────────────────────────────────────
   const map = L.map('map', { zoomControl: true }).setView([33.8170, -118.0375], 15);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  L.tileLayer('https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_4qe1_1_5224bc7064038a084bab0cc1', {
     attribution: '© OpenStreetMap contributors © CARTO',
     maxZoom: 19,
   }).addTo(map);
